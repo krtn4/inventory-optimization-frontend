@@ -1,0 +1,202 @@
+/* Global reset */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Segoe UI, Arial, sans-serif;
+  background-color: #0f172a;
+  color: #e5e7eb;
+}
+
+/* Headings */
+h1 {
+  font-size: 32px;
+  margin-bottom: 10px;
+  color: #22c55e;
+}
+
+h2 {
+  margin-bottom: 15px;
+}
+
+/* Card container */
+.card{
+  background-color: #1e293b;
+  padding: 2px 15px 10px 10px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  margin-bottom: 10px;
+}
+
+
+/* Table styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  background-color: #334155;
+  padding: 12px;
+  text-align: left;
+}
+
+td {
+  padding: 12px;
+  border-bottom: 1px solid #334155;
+}
+
+tr:hover {
+  background-color: #334155;
+}
+
+
+
+
+
+/* Action buttons container */
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+/* Base button */
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+/* Sell button */
+.sell-btn {
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  color: white;
+}
+
+.sell-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(79, 70, 229, 0.45);
+}
+
+.sell-btn:active {
+  transform: scale(0.95);
+}
+
+/* Restock button */
+.restock-btn {
+  background: linear-gradient(135deg, #10b981, #14b8a6);
+  color: white;
+}
+
+.restock-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(20, 184, 166, 0.45);
+}
+
+.restock-btn:active {
+  transform: scale(0.95);
+}
+
+/* Disabled state */
+.action-btn:disabled {
+  background: #374151;
+  color: #9ca3af;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+
+
+/* Charts layout */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr; /* Pie smaller, line bigger */
+  gap: 24px;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+/* Responsive fallback */
+@media (max-width: 1000px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.product-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+  margin-bottom: -10px;
+}
+
+.product-btn {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #e5e7eb;
+  padding: 8px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+   margin-bottom: 40px;
+}
+
+.product-btn:hover {
+  background: #334155;
+}
+
+.product-btn.active {
+  background: #38bdf8;
+  color: #020617;
+  font-weight: 600;
+}
+
+
+.form-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.form-row input {
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: white;
+  padding: 8px;
+  border-radius: 6px;
+}
+
+.delete-btn {
+  background: #7f1d1d;
+}
+
+.delete-btn:hover {
+  background: #991b1b;
+}
+
+
+.form-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.form-row input {
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: white;
+  padding: 8px;
+  border-radius: 6px;
+}
