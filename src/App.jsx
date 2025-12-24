@@ -39,7 +39,7 @@ const [demandSummary, setDemandSummary] = useState([]);
   const fetchStockoutDate = async (productId) => {
     try {
       const res = await fetch(
-        `http://localhost:3000/api/inventory/stockout/1/${productId}`
+        `${import.meta.env.VITE_API_URL}/api/inventory/stockout/1/${productId}`
       );
       const data = await res.json();
 
@@ -65,7 +65,7 @@ const [demandSummary, setDemandSummary] = useState([]);
   
 
 const fetchProducts = () => {
-  fetch("http://localhost:3000/api/products")
+  fetch(`${import.meta.env.VITE_API_URL}/api/products`)
     .then(res => res.json())
     .then(data => {
       setProducts(data);
@@ -86,7 +86,7 @@ const addProduct = async () => {
   }
 
   try {
-    await fetch("http://localhost:3000/api/products", {
+    await fetch(`${import.meta.env.VITE_API_URL}/api/products`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -160,7 +160,7 @@ useEffect(() => {
 
   const updateStock = async (productId, change) => {
   try {
-    await fetch("http://localhost:3000/api/inventory/update-stock", {
+    await fetch(`${import.meta.env.VITE_API_URL}/api/inventory/update-stock`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -184,7 +184,7 @@ const deleteProduct = async (productId) => {
 
   try {
     await fetch(
-      `http://localhost:3000/api/products/${productId}`,
+      `${import.meta.env.VITE_API_URL}/api/products/${productId}`,
       { method: "DELETE" }
     );
 
@@ -201,7 +201,7 @@ const deleteProduct = async (productId) => {
 const fetchDemandTrend = async (productId) => {
   try {
     const res = await fetch(
-      `http://localhost:3000/api/inventory/demand/1/${productId}`
+      `${import.meta.env.VITE_API_URL}/api/inventory/demand/1/${productId}`
     );
     const data = await res.json();
     setDemandData(data);
@@ -217,7 +217,7 @@ const fetchDemandTrend = async (productId) => {
 const fetchDemandSummary = async () => {
   try {
     const res = await fetch(
-      "http://localhost:3000/api/inventory/demand-summary/1"
+      `${import.meta.env.VITE_API_URL}/api/inventory/demand-summary/1`
     );
     const data = await res.json();
     setDemandSummary(data);
