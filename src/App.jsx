@@ -88,7 +88,7 @@ const fetchProducts = () => {
     .then(res => res.json())
     .then(data => {
       setProducts(data);
-     // data.forEach(p => fetchStockoutDate(p.product_id));
+      data.forEach(p => fetchStockoutDate(p.product_id));
     })
     .catch(err => console.error(err));
 };
@@ -430,7 +430,7 @@ const fetchDemandSummary = async () => {
 
               return (
                 <tr key={p.product_id}>
-                  <td>{p.product_id}</td>
+                  <td>{p.display_order}</td>
                   <td>{p.product_name}</td>
                   <td>{p.stock_keeping_unit}</td>
                   <td>₹ {p.unit_price}</td>
