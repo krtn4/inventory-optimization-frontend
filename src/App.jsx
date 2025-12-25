@@ -150,15 +150,15 @@ const [newProduct, setNewProduct] = useState({
 }, []);
 
 
-// useEffect(() => {
-//   fetchDemandSummary();
-// }, []);
+useEffect(() => {
+  fetchDemandSummary();
+}, []);
 
-// useEffect(() => {
-//   if (products.length > 0) {
-//     fetchDemandTrend(products[0].product_id);
-//   }
-// }, [products]);
+useEffect(() => {
+  if (products.length > 0) {
+    fetchDemandTrend(products[0].product_id);
+  }
+}, [products]);
 
 
 
@@ -218,33 +218,33 @@ const deleteProduct = async (productId) => {
 
 
 
-// const fetchDemandTrend = async (productId) => {
-//   try {
-//     const res = await fetch(
-//       `${import.meta.env.VITE_API_URL}/api/inventory/demand/1/${productId}`
-//     );
-//     const data = await res.json();
-//     setDemandData(data);
-//     setSelectedProduct(productId);
-//   } catch (err) {
-//     console.error("Demand fetch failed", err);
-//   }
-// };
+const fetchDemandTrend = async (productId) => {
+  try {
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/inventory/demand/1/${productId}`
+    );
+    const data = await res.json();
+    setDemandData(data);
+    setSelectedProduct(productId);
+  } catch (err) {
+    console.error("Demand fetch failed", err);
+  }
+};
 
 
 
 
-// const fetchDemandSummary = async () => {
-//   try {
-//     const res = await fetch(
-//       `${import.meta.env.VITE_API_URL}/api/inventory/demand-summary/1`
-//     );
-//     const data = await res.json();
-//     setDemandSummary(data);
-//   } catch (err) {
-//     console.error("Demand summary fetch failed", err);
-//   }
-// };
+const fetchDemandSummary = async () => {
+  try {
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/inventory/demand-summary/1`
+    );
+    const data = await res.json();
+    setDemandSummary(data);
+  } catch (err) {
+    console.error("Demand summary fetch failed", err);
+  }
+};
 
 
   // ---------- UI ----------
@@ -354,7 +354,7 @@ const deleteProduct = async (productId) => {
               className={`product-btn ${
                 selectedProduct === p.product_id ? "active" : ""
               }`}
-             // onClick={() => fetchDemandTrend(p.product_id)}
+              onClick={() => fetchDemandTrend(p.product_id)}
             >
               {p.product_name}
             </button>
