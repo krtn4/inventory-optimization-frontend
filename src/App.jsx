@@ -22,11 +22,29 @@ function App() {
   const [stockoutDates, setStockoutDates] = useState({});
 
 
-  const pieData = [
-  { name: "Stock OK", value: products.filter(p => p.current_stock > p.reorder_point).length },
-  { name: "Low Stock", value: products.filter(p => p.current_stock > 0 && p.current_stock <= p.reorder_point).length },
-  { name: "Out of Stock", value: products.filter(p => p.current_stock <= 0).length },
+const pieData = [
+  {
+    name: "Stock OK",
+    value: products.filter(
+      p => (p.current_stock ?? 0) > (p.reorder_point ?? 0)
+    ).length,
+  },
+  {
+    name: "Low Stock",
+    value: products.filter(
+      p =>
+        (p.current_stock ?? 0) > 0 &&
+        (p.current_stock ?? 0) <= (p.reorder_point ?? 0)
+    ).length,
+  },
+  {
+    name: "Out of Stock",
+    value: products.filter(
+      p => (p.current_stock ?? 0) <= 0
+    ).length,
+  },
 ];
+
 
 const COLORS = ["#22c55e", "#facc15", "#ef4444"];
 
@@ -35,7 +53,7 @@ const [demandSummary, setDemandSummary] = useState([]);
 
 
   // ---------- Helpers ----------
-
+/*
   const fetchStockoutDate = async (productId) => {
     try {
       const res = await fetch(
@@ -51,6 +69,7 @@ const [demandSummary, setDemandSummary] = useState([]);
       console.error("Stockout fetch failed", err);
     }
   };
+  */
 
   const getStockStatus = (p) => {
     if (p.current_stock <= 0) {
@@ -69,7 +88,7 @@ const fetchProducts = () => {
     .then(res => res.json())
     .then(data => {
       setProducts(data);
-      data.forEach(p => fetchStockoutDate(p.product_id));
+     // data.forEach(p => fetchStockoutDate(p.product_id));
     })
     .catch(err => console.error(err));
 };
@@ -131,17 +150,17 @@ const [newProduct, setNewProduct] = useState({
 }, []);
 
 
-useEffect(() => {
-  fetchDemandSummary();
-}, []);
+// useEffect(() => {
+//   fetchDemandSummary();
+// }, []);
 
-
+/*
 useEffect(() => {
   if (products.length > 0) {
     fetchDemandTrend(products[0].product_id);
   }
 }, [products]);
-
+*/
 
 
   // ---------- KPI Calculations ----------
@@ -149,33 +168,35 @@ useEffect(() => {
   const totalProducts = products.length;
 
   const lowStockCount = products.filter(
-    (p) => p.current_stock > 0 && p.current_stock <= p.reorder_point
-  ).length;
+  p =>
+    (p.current_stock ?? 0) > 0 &&
+    (p.current_stock ?? 0) <= (p.reorder_point ?? 0)
+).length;
 
-  const outOfStockCount = products.filter(
-    (p) => p.current_stock <= 0
-  ).length;
-
-
-
-  const updateStock = async (productId, change) => {
-  try {
-    await fetch(`${import.meta.env.VITE_API_URL}/api/inventory/update-stock`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        product_id: productId,
-        quantity_change: change,
-      }),
-    });
+const outOfStockCount = products.filter(
+  p => (p.current_stock ?? 0) <= 0
+).length;
 
 
-    // Refresh UI after update
-    fetchProducts();
-  } catch (err) {
-    console.error("Stock update error", err);
-  }
-};
+
+//   // const updateStock = async (productId, change) => {
+//   // try {
+//   //   await fetch(`${import.meta.env.VITE_API_URL}/api/inventory/update-stock`, {
+//   //     method: "POST",
+//   //     headers: { "Content-Type": "application/json" },
+//   //     body: JSON.stringify({
+//   //       product_id: productId,
+//   //       quantity_change: change,
+//   //     }),
+//   //   });
+
+
+//     // Refresh UI after update
+//     fetchProducts();
+//   } catch (err) {
+//     console.error("Stock update error", err);
+//   }
+// };
 
 
 
@@ -198,33 +219,33 @@ const deleteProduct = async (productId) => {
 
 
 
-const fetchDemandTrend = async (productId) => {
-  try {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/inventory/demand/1/${productId}`
-    );
-    const data = await res.json();
-    setDemandData(data);
-    setSelectedProduct(productId);
-  } catch (err) {
-    console.error("Demand fetch failed", err);
-  }
-};
+// const fetchDemandTrend = async (productId) => {
+//   try {
+//     const res = await fetch(
+//       `${import.meta.env.VITE_API_URL}/api/inventory/demand/1/${productId}`
+//     );
+//     const data = await res.json();
+//     setDemandData(data);
+//     setSelectedProduct(productId);
+//   } catch (err) {
+//     console.error("Demand fetch failed", err);
+//   }
+// };
 
 
 
 
-const fetchDemandSummary = async () => {
-  try {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/inventory/demand-summary/1`
-    );
-    const data = await res.json();
-    setDemandSummary(data);
-  } catch (err) {
-    console.error("Demand summary fetch failed", err);
-  }
-};
+// const fetchDemandSummary = async () => {
+//   try {
+//     const res = await fetch(
+//       `${import.meta.env.VITE_API_URL}/api/inventory/demand-summary/1`
+//     );
+//     const data = await res.json();
+//     setDemandSummary(data);
+//   } catch (err) {
+//     console.error("Demand summary fetch failed", err);
+//   }
+// };
 
 
   // ---------- UI ----------
@@ -417,7 +438,7 @@ const fetchDemandSummary = async () => {
                   <td style={{ color: status.color, fontWeight: "bold" }}>
                     {status.label}
                   </td>
-                  <td>{p.current_stock}</td>
+                  <td>{p.current_stock ?? 0}</td>
                   <td>
                     {stockoutDates[p.product_id]
                       ? new Date(
@@ -427,7 +448,7 @@ const fetchDemandSummary = async () => {
                   </td>
                   <td>
                     <div className="action-buttons">
-                      <button
+                      {/* <button
                         className="action-btn sell-btn"
                         onClick={() => updateStock(p.product_id, -1)}
                         disabled={p.current_stock <= 0}
@@ -440,7 +461,7 @@ const fetchDemandSummary = async () => {
                         onClick={() => updateStock(p.product_id, 5)}
                       >
                         + Restock
-                      </button>
+                      </button> */}
                       <button
                         className="action-btn delete-btn"
                         onClick={() => deleteProduct(p.product_id)}
