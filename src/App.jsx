@@ -234,18 +234,18 @@ const fetchDemandSummary = async () => {
       <h1>Inventory Optimization Dashboard</h1>
 
       {/* KPI Cards */}
-      <div style={{ display: "flex", gap: "20px", marginBottom: "30px" }}>
-        <div className="card">
+      <div className="kpi-grid" style={{ marginBottom: "30px" }}>
+        <div className="card table-wrapper">
           <h3>Total Products</h3>
           <h2>{totalProducts}</h2>
         </div>
 
-        <div className="card">
+        <div className="card table-wrapper">
           <h3>Low Stock</h3>
           <h2 style={{ color: "#facc15" }}>{lowStockCount}</h2>
         </div>
 
-        <div className="card">
+        <div className="card table-wrapper">
           <h3>Out of Stock</h3>
           <h2 style={{ color: "#ef4444" }}>{outOfStockCount}</h2>
         </div>
@@ -255,7 +255,7 @@ const fetchDemandSummary = async () => {
 
       <div className="charts-grid">
           {/* Pie Chart */}
-          <div className="card">
+          <div className="card table-wrapper">
             <h2>Inventory Health</h2>
 
             <ResponsiveContainer width="100%" height={300}>
@@ -277,7 +277,7 @@ const fetchDemandSummary = async () => {
           </div>
 
           
-        <div className="card">
+        <div className="card table-wrapper">
         <h2>Daily Demand by Product</h2>
 
         <ResponsiveContainer width="100%" height={350}>
@@ -326,7 +326,8 @@ const fetchDemandSummary = async () => {
 
         
 
-        <div className="product-selector">
+        <div className="product-selector" style={{ marginBottom: "30px" }}>
+
           {products.map((p) => (
             <button
               key={p.product_id}
@@ -342,7 +343,7 @@ const fetchDemandSummary = async () => {
 
 
 
-      <div className="card">
+      <div className="card table-wrapper">
         <h2>Add New Product</h2>
 
         <div className="form-row">
@@ -386,7 +387,7 @@ const fetchDemandSummary = async () => {
 
 
       {/* Products Table */}
-      <div className="card">
+      <div className="card table-wrapper">
 
         <h2>Products</h2>
 

@@ -126,6 +126,16 @@ tr:hover {
   margin-bottom: 30px;
 }
 
+
+/* Improve charts on small screens */
+@media (max-width: 768px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+
 /* Responsive fallback */
 @media (max-width: 1000px) {
   .charts-grid {
@@ -199,4 +209,89 @@ tr:hover {
   color: white;
   padding: 8px;
   border-radius: 6px;
+}
+
+
+
+/* Mobile table scroll */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  min-width: 900px;
+}
+
+
+/* KPI cards responsive */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* Product buttons responsive */
+@media (max-width: 600px) {
+  .product-selector {
+    justify-content: center;
+  }
+
+  .product-btn {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+}
+
+
+/* Action buttons stack on mobile */
+@media (max-width: 600px) {
+  .action-buttons {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+
+/* Add product form responsive */
+@media (max-width: 700px) {
+  .form-row {
+    flex-direction: column;
+  }
+
+  .form-row input {
+    width: 100%;
+  }
+}
+
+
+/* Prevent horizontal overflow */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+
+.full-width {
+  grid-column: 1 / -1;
 }
