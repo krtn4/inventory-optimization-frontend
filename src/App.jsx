@@ -81,17 +81,31 @@ const [demandSummary, setDemandSummary] = useState([]);
     return { label: "STOCK OK", color: "#22c55e" };
   };
 
-  
 
-const fetchProducts = () => {
-  fetch(`${import.meta.env.VITE_API_URL}/api/products`)
-    .then(res => res.json())
-    .then(data => {
-      setProducts(data);
-      data.forEach(p => fetchStockoutDate(p.product_id));
-    })
-    .catch(err => console.error(err));
+
+const fetchProducts = async () => {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text);
+    }
+
+    const data = await res.json();
+
+    if (!Array.isArray(data)) {
+      throw new Error("Products response is not an array");
+    }
+
+    setProducts(data);
+    data.forEach(p => fetchStockoutDate(p.product_id));
+  } catch (err) {
+    console.error("Fetch products failed:", err);
+    setProducts([]); // prevent UI crash
+  }
 };
+
 
 
 const addProduct = async () => {
@@ -233,16 +247,26 @@ const fetchDemandTrend = async (productId) => {
 
 
 
-
 const fetchDemandSummary = async () => {
   try {
     const res = await fetch(
       `${import.meta.env.VITE_API_URL}/api/inventory/demand-summary/1`
     );
+
+    if (!res.ok) {
+      throw new Error(await res.text());
+    }
+
     const data = await res.json();
+
+    if (!Array.isArray(data)) {
+      throw new Error("Demand summary is not array");
+    }
+
     setDemandSummary(data);
   } catch (err) {
-    console.error("Demand summary fetch failed", err);
+    console.error("Demand summary fetch failed:", err);
+    setDemandSummary([]);
   }
 };
 
