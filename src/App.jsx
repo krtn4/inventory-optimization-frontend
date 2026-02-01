@@ -16,41 +16,39 @@ import {
   Bar,
 } from "recharts";
 
-
 function App() {
   const [products, setProducts] = useState([]);
   const [stockoutDates, setStockoutDates] = useState({});
 
+  // ✅ Loading states (NEW)
+  const [loadingProducts, setLoadingProducts] = useState(true);
+  const [loadingDemandSummary, setLoadingDemandSummary] = useState(true);
+  const [loadingDemandTrend, setLoadingDemandTrend] = useState(true);
 
-const pieData = [
-  {
-    name: "Stock OK",
-    value: products.filter(
-      p => (p.current_stock ?? 0) > (p.reorder_point ?? 0)
-    ).length,
-  },
-  {
-    name: "Low Stock",
-    value: products.filter(
-      p =>
-        (p.current_stock ?? 0) > 0 &&
-        (p.current_stock ?? 0) <= (p.reorder_point ?? 0)
-    ).length,
-  },
-  {
-    name: "Out of Stock",
-    value: products.filter(
-      p => (p.current_stock ?? 0) <= 0
-    ).length,
-  },
-];
+  const pieData = [
+    {
+      name: "Stock OK",
+      value: products.filter(
+        (p) => (p.current_stock ?? 0) > (p.reorder_point ?? 0)
+      ).length,
+    },
+    {
+      name: "Low Stock",
+      value: products.filter(
+        (p) =>
+          (p.current_stock ?? 0) > 0 &&
+          (p.current_stock ?? 0) <= (p.reorder_point ?? 0)
+      ).length,
+    },
+    {
+      name: "Out of Stock",
+      value: products.filter((p) => (p.current_stock ?? 0) <= 0).length,
+    },
+  ];
 
+  const COLORS = ["#22c55e", "#facc15", "#ef4444"];
 
-const COLORS = ["#22c55e", "#facc15", "#ef4444"];
-
-
-const [demandSummary, setDemandSummary] = useState([]);
-
+  const [demandSummary, setDemandSummary] = useState([]);
 
   // ---------- Helpers ----------
 
@@ -69,7 +67,6 @@ const [demandSummary, setDemandSummary] = useState([]);
       console.error("Stockout fetch failed", err);
     }
   };
-  
 
   const getStockStatus = (p) => {
     if (p.current_stock <= 0) {
@@ -81,195 +78,183 @@ const [demandSummary, setDemandSummary] = useState([]);
     return { label: "STOCK OK", color: "#22c55e" };
   };
 
+  const fetchProducts = async () => {
+    try {
+      setLoadingProducts(true);
 
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
 
-const fetchProducts = async () => {
-  try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text);
+      }
 
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(text);
+      const data = await res.json();
+
+      if (!Array.isArray(data)) {
+        throw new Error("Products response is not an array");
+      }
+
+      setProducts(data);
+      data.forEach((p) => fetchStockoutDate(p.product_id));
+    } catch (err) {
+      console.error("Fetch products failed:", err);
+      setProducts([]); // prevent UI crash
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
+
+  const addProduct = async () => {
+    if (
+      !newProduct.product_name ||
+      !newProduct.stock_keeping_unit ||
+      !newProduct.unit_price
+    ) {
+      alert("Fill all fields");
+      return;
     }
 
-    const data = await res.json();
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/products`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          business_id: 1,
+          product_name: newProduct.product_name,
+          stock_keeping_unit: newProduct.stock_keeping_unit,
+          unit_cost: 0,
+          unit_price: newProduct.unit_price,
+        }),
+      });
 
-    if (!Array.isArray(data)) {
-      throw new Error("Products response is not an array");
+      setNewProduct({
+        product_name: "",
+        stock_keeping_unit: "",
+        unit_price: "",
+      });
+
+      fetchProducts();
+    } catch (err) {
+      console.error("Add product failed", err);
     }
+  };
 
-    setProducts(data);
-    data.forEach(p => fetchStockoutDate(p.product_id));
-  } catch (err) {
-    console.error("Fetch products failed:", err);
-    setProducts([]); // prevent UI crash
-  }
-};
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [demandData, setDemandData] = useState([]);
 
-
-
-const addProduct = async () => {
-  if (
-    !newProduct.product_name ||
-    !newProduct.stock_keeping_unit ||
-    !newProduct.unit_price
-  ) {
-    alert("Fill all fields");
-    return;
-  }
-
-  try {
-    await fetch(`${import.meta.env.VITE_API_URL}/api/products`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        business_id: 1,
-        product_name: newProduct.product_name,
-        stock_keeping_unit: newProduct.stock_keeping_unit,
-        unit_cost: 0,
-        unit_price: newProduct.unit_price,
-      }),
-    });
-
-    setNewProduct({
-      product_name: "",
-      stock_keeping_unit: "",
-      unit_price: "",
-    });
-
-    fetchProducts();
-  } catch (err) {
-    console.error("Add product failed", err);
-  }
-};
-
-
-
-const [selectedProduct, setSelectedProduct] = useState(null);
-const [demandData, setDemandData] = useState([]);
-
-
-
-const [newProduct, setNewProduct] = useState({
-  product_name: "",
-  stock_keeping_unit: "",
-  unit_price: "",
-});
-
+  const [newProduct, setNewProduct] = useState({
+    product_name: "",
+    stock_keeping_unit: "",
+    unit_price: "",
+  });
 
   // ---------- Data Fetch ----------
 
   useEffect(() => {
-  fetchProducts();
-}, []);
+    fetchProducts();
+  }, []);
 
+  useEffect(() => {
+    fetchDemandSummary();
+  }, []);
 
-useEffect(() => {
-  fetchDemandSummary();
-}, []);
-
-useEffect(() => {
-  if (products.length > 0) {
-    fetchDemandTrend(products[0].product_id);
-  }
-}, [products]);
-
-
+  useEffect(() => {
+    if (products.length > 0) {
+      fetchDemandTrend(products[0].product_id);
+    }
+  }, [products]);
 
   // ---------- KPI Calculations ----------
 
   const totalProducts = products.length;
 
   const lowStockCount = products.filter(
-  p =>
-    (p.current_stock ?? 0) > 0 &&
-    (p.current_stock ?? 0) <= (p.reorder_point ?? 0)
-).length;
+    (p) =>
+      (p.current_stock ?? 0) > 0 &&
+      (p.current_stock ?? 0) <= (p.reorder_point ?? 0)
+  ).length;
 
-const outOfStockCount = products.filter(
-  p => (p.current_stock ?? 0) <= 0
-).length;
-
-
+  const outOfStockCount = products.filter((p) => (p.current_stock ?? 0) <= 0)
+    .length;
 
   const updateStock = async (productId, change) => {
-  try {
-    await fetch(`${import.meta.env.VITE_API_URL}/api/inventory/update-stock`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        product_id: productId,
-        quantity_change: change,
-      }),
-    });
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/inventory/update-stock`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          product_id: productId,
+          quantity_change: change,
+        }),
+      });
 
-
-    // Refresh UI after update
-    fetchProducts();
-  } catch (err) {
-    console.error("Stock update error", err);
-  }
-};
-
-
-
-const deleteProduct = async (productId) => {
-  if (!window.confirm("Are you sure you want to Delete this product?")) return;
-
-  try {
-    await fetch(
-      `${import.meta.env.VITE_API_URL}/api/products/${productId}`,
-      { method: "DELETE" }
-    );
-
-    fetchProducts();
-  } catch (err) {
-    console.error("Delete failed", err);
-  }
-};
-
-
-
-
-
-const fetchDemandTrend = async (productId) => {
-  try {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/inventory/demand/1/${productId}`
-    );
-    const data = await res.json();
-    setDemandData(data);
-    setSelectedProduct(productId);
-  } catch (err) {
-    console.error("Demand fetch failed", err);
-  }
-};
-
-
-
-const fetchDemandSummary = async () => {
-  try {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/inventory/demand-summary/1`
-    );
-
-    if (!res.ok) {
-      throw new Error(await res.text());
+      // Refresh UI after update
+      fetchProducts();
+    } catch (err) {
+      console.error("Stock update error", err);
     }
+  };
 
-    const data = await res.json();
+  const deleteProduct = async (productId) => {
+    if (!window.confirm("Are you sure you want to Delete this product?"))
+      return;
 
-    if (!Array.isArray(data)) {
-      throw new Error("Demand summary is not array");
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/products/${productId}`, {
+        method: "DELETE",
+      });
+
+      fetchProducts();
+    } catch (err) {
+      console.error("Delete failed", err);
     }
+  };
 
-    setDemandSummary(data);
-  } catch (err) {
-    console.error("Demand summary fetch failed:", err);
-    setDemandSummary([]);
-  }
-};
+  const fetchDemandTrend = async (productId) => {
+    try {
+      setLoadingDemandTrend(true);
 
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/inventory/demand/1/${productId}`
+      );
+      const data = await res.json();
+      setDemandData(data);
+      setSelectedProduct(productId);
+    } catch (err) {
+      console.error("Demand fetch failed", err);
+      setDemandData([]);
+    } finally {
+      setLoadingDemandTrend(false);
+    }
+  };
+
+  const fetchDemandSummary = async () => {
+    try {
+      setLoadingDemandSummary(true);
+
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/inventory/demand-summary/1`
+      );
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+
+      const data = await res.json();
+
+      if (!Array.isArray(data)) {
+        throw new Error("Demand summary is not array");
+      }
+
+      setDemandSummary(data);
+    } catch (err) {
+      console.error("Demand summary fetch failed:", err);
+      setDemandSummary([]);
+    } finally {
+      setLoadingDemandSummary(false);
+    }
+  };
 
   // ---------- UI ----------
 
@@ -277,31 +262,44 @@ const fetchDemandSummary = async () => {
     <div style={{ padding: "10px" }}>
       <h1>Inventory Optimization Dashboard</h1>
 
-      {/* KPI Cards */}
+      {/* ✅ KPI Cards */}
       <div className="kpi-grid" style={{ marginBottom: "30px" }}>
         <div className="card table-wrapper">
           <h3>Total Products</h3>
-          <h2>{totalProducts}</h2>
+          {loadingProducts ? (
+            <div className="skeleton skeleton-number"></div>
+          ) : (
+            <h2>{totalProducts}</h2>
+          )}
         </div>
 
         <div className="card table-wrapper">
           <h3>Low Stock</h3>
-          <h2 style={{ color: "#facc15" }}>{lowStockCount}</h2>
+          {loadingProducts ? (
+            <div className="skeleton skeleton-number"></div>
+          ) : (
+            <h2 style={{ color: "#facc15" }}>{lowStockCount}</h2>
+          )}
         </div>
 
         <div className="card table-wrapper">
           <h3>Out of Stock</h3>
-          <h2 style={{ color: "#ef4444" }}>{outOfStockCount}</h2>
+          {loadingProducts ? (
+            <div className="skeleton skeleton-number"></div>
+          ) : (
+            <h2 style={{ color: "#ef4444" }}>{outOfStockCount}</h2>
+          )}
         </div>
       </div>
 
-
-
       <div className="charts-grid">
-          {/* Pie Chart */}
-          <div className="card table-wrapper">
-            <h2>Inventory Health</h2>
+        {/* ✅ Pie Chart */}
+        <div className="card table-wrapper">
+          <h2>Inventory Health</h2>
 
+          {loadingProducts ? (
+            <div className="skeleton skeleton-chart"></div>
+          ) : (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -318,39 +316,47 @@ const fetchDemandSummary = async () => {
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
-          </div>
+          )}
+        </div>
 
-          
+        {/* ✅ Bar Chart */}
         <div className="card table-wrapper">
-        <h2>Daily Demand by Product</h2>
+          <h2>Daily Demand by Product</h2>
 
-        <ResponsiveContainer width="100%" height={350}>
-          <BarChart data={demandSummary}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="product_name"
-              angle={-30}
-              textAnchor="end"
-              interval={0}
-              height={80}
-              tick={{ fill: "#cbd5f5", fontSize: 12 }}
-            />
-            <YAxis />
-            <Tooltip />
-            <Bar
-              dataKey="total_demand"
-              fill="#38bdf8"
-              radius={[6, 6, 0, 0]}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-       </div>
-       </div>
+          {loadingDemandSummary ? (
+            <div className="skeleton skeleton-chart"></div>
+          ) : (
+            <ResponsiveContainer width="100%" height={350}>
+              <BarChart data={demandSummary}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="product_name"
+                  angle={-30}
+                  textAnchor="end"
+                  interval={0}
+                  height={80}
+                  tick={{ fill: "#cbd5f5", fontSize: 12 }}
+                />
+                <YAxis />
+                <Tooltip />
+                <Bar
+                  dataKey="total_demand"
+                  fill="#38bdf8"
+                  radius={[6, 6, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>
 
+      {/* ✅ Demand Trend */}
+      <div className="card full-width">
+        <h2>Daily Demand Trend</h2>
 
-        <div className="card full-width">
-          <h2>Daily Demand Trend</h2>
-
+        {loadingDemandTrend ? (
+          <div className="skeleton skeleton-chart"></div>
+        ) : (
           <ResponsiveContainer width="100%" height={350}>
             <LineChart data={demandData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -366,13 +372,19 @@ const fetchDemandSummary = async () => {
               />
             </LineChart>
           </ResponsiveContainer>
-        </div>
+        )}
+      </div>
 
-        
-
-        <div className="product-selector" style={{ marginBottom: "30px" }}>
-
-          {products.map((p) => (
+      {/* ✅ Product selector buttons */}
+      <div className="product-selector" style={{ marginBottom: "30px" }}>
+        {loadingProducts ? (
+          <>
+            <div className="skeleton" style={{ height: 40, width: 130 }}></div>
+            <div className="skeleton" style={{ height: 40, width: 130 }}></div>
+            <div className="skeleton" style={{ height: 40, width: 130 }}></div>
+          </>
+        ) : (
+          products.map((p) => (
             <button
               key={p.product_id}
               className={`product-btn ${
@@ -382,11 +394,11 @@ const fetchDemandSummary = async () => {
             >
               {p.product_name}
             </button>
-          ))}
-        </div>
+          ))
+        )}
+      </div>
 
-
-
+      {/* ✅ Add New Product (No loader needed here) */}
       <div className="card table-wrapper">
         <h2>Add New Product</h2>
 
@@ -419,20 +431,14 @@ const fetchDemandSummary = async () => {
             }
           />
 
-          <button
-            className="action-btn restock-btn"
-            onClick={addProduct}
-          >
+          <button className="action-btn restock-btn" onClick={addProduct}>
             + Add Product
           </button>
         </div>
       </div>
 
-
-
-      {/* Products Table */}
+      {/* ✅ Products Table */}
       <div className="card table-wrapper">
-
         <h2>Products</h2>
 
         <table>
@@ -448,54 +454,66 @@ const fetchDemandSummary = async () => {
               <th>Actions</th>
             </tr>
           </thead>
+
           <tbody>
-            {products.map((p) => {
-              const status = getStockStatus(p);
-
-              return (
-                <tr key={p.product_id}>
-                  <td>{p.display_order}</td>
-                  <td>{p.product_name}</td>
-                  <td>{p.stock_keeping_unit}</td>
-                  <td>₹ {p.unit_price}</td>
-                  <td style={{ color: status.color, fontWeight: "bold" }}>
-                    {status.label}
-                  </td>
-                  <td>{p.current_stock ?? 0}</td>
-                  <td>
-                    {stockoutDates[p.product_id]
-                      ? new Date(
-                          stockoutDates[p.product_id]
-                        ).toLocaleDateString("en-GB")
-                      : "—"}
-                  </td>
-                  <td>
-                    <div className="action-buttons">
-                       <button
-                        className="action-btn sell-btn"
-                        onClick={() => updateStock(p.product_id, -1)}
-                        disabled={p.current_stock <= 0}
-                      >
-                        − Sell
-                      </button>
-
-                      <button
-                        className="action-btn restock-btn"
-                        onClick={() => updateStock(p.product_id, 5)}
-                      >
-                        + Restock
-                      </button>
-                      <button
-                        className="action-btn delete-btn"
-                        onClick={() => deleteProduct(p.product_id)}
-                      >
-                        🗑 Delete
-                      </button>
-                    </div>
+            {loadingProducts ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <tr key={i}>
+                  <td colSpan="8">
+                    <div className="skeleton skeleton-table-row"></div>
                   </td>
                 </tr>
-              );
-            })}
+              ))
+            ) : (
+              products.map((p) => {
+                const status = getStockStatus(p);
+
+                return (
+                  <tr key={p.product_id}>
+                    <td>{p.display_order}</td>
+                    <td>{p.product_name}</td>
+                    <td>{p.stock_keeping_unit}</td>
+                    <td>₹ {p.unit_price}</td>
+                    <td style={{ color: status.color, fontWeight: "bold" }}>
+                      {status.label}
+                    </td>
+                    <td>{p.current_stock ?? 0}</td>
+                    <td>
+                      {stockoutDates[p.product_id]
+                        ? new Date(stockoutDates[p.product_id]).toLocaleDateString(
+                            "en-GB"
+                          )
+                        : "—"}
+                    </td>
+                    <td>
+                      <div className="action-buttons">
+                        <button
+                          className="action-btn sell-btn"
+                          onClick={() => updateStock(p.product_id, -1)}
+                          disabled={p.current_stock <= 0}
+                        >
+                          − Sell
+                        </button>
+
+                        <button
+                          className="action-btn restock-btn"
+                          onClick={() => updateStock(p.product_id, 5)}
+                        >
+                          + Restock
+                        </button>
+
+                        <button
+                          className="action-btn delete-btn"
+                          onClick={() => deleteProduct(p.product_id)}
+                        >
+                          🗑 Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>

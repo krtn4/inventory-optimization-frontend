@@ -295,3 +295,58 @@ html, body {
 .full-width {
   grid-column: 1 / -1;
 }
+
+
+
+/* ✅ Skeleton Loader */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #334155;
+  border-radius: 8px;
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.08),
+    transparent
+  );
+  animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Skeleton size helpers */
+.skeleton-text {
+  height: 16px;
+  width: 70%;
+  margin-top: 10px;
+}
+
+.skeleton-number {
+  height: 40px;
+  width: 80px;
+  margin-top: 12px;
+}
+
+.skeleton-chart {
+  height: 300px;
+  width: 100%;
+  margin-top: 15px;
+}
+
+.skeleton-table-row {
+  height: 20px;
+  width: 100%;
+  margin: 8px 0;
+}
